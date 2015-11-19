@@ -21,4 +21,4 @@ github_username:  jekyll
 markdown: kramdown
 kramdown: 
  input: GFM
-highlighter: rouge
+highlighter: pygments
