@@ -20,6 +20,3 @@ highlighter: rouge
 
 # Build settings
 markdown: kramdown
-kramdown: 
- input: GFM
- 
