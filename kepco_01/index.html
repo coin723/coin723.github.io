@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="CSS/stylesheet.css" />
+		<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	</head>
+	<body>
+		<script>
+			d3.csv("kepco_01.csv", function(data) {
+				data.forEach(function(d) {
+					d.PN = +d.PN;
+					d.public_GA = +d.public_GA;
+					d.nonUtil_sum = +d.nonUtil_sum;
+				});
+
+				var margin = {top: 50, right: 50, bottom: 50, left: 75};
+
+				var initWidth = window.innerWidth;
+				var initHeight = window.innerHeight;
+
+				if (initWidth * 9 / 16 < initHeight) {
+					var width = initWidth - margin.right - margin.left;
+					var height = initWidth * 9 / 16 - margin.top - margin.bottom;
+				} else {
+					var width = initHeight * 16 / 9 - margin.right - margin.left;
+					var height = initHeight - margin.top - margin.bottom;
+				}
+
+
+
+				var svg = d3.select("body")
+					.append("svg")
+					.attr("width", width + margin.right + margin.left)
+					.attr("height", height + margin.top + margin.bottom)
+					.append("g")
+					.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+				var xScale = d3.scale.ordinal()
+					.domain(data.map(function(d) {
+						return d.year;
+					}))
+					.rangeBands([0, width], .3);
+
+				var yScale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d) {
+						return d.PN;
+					})])
+					.range([height, 0]);
+
+				var xAxis = d3.svg.axis()
+					.scale(xScale)
+					.orient("bottom");
+
+				var yAxis = d3.svg.axis()
+					.scale(yScale)
+					.orient("left");
+
+				svg.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate(0, " + height + ")")
+					.call(xAxis);
+
+				svg.append("g")
+					.attr("class", "axis")
+					.call(yAxis);
+
+				var g_bar = svg.selectAll(".bar")
+					.data(data)
+					.enter()
+					.append("g")
+					.attr("class", "bar");
+
+				g_bar.append("rect")
+					.attr("x", function(d) {
+						return xScale(d.year);
+					})
+					.attr("width", xScale.rangeBand())
+					.attr("y", function(d) {
+						return yScale(d.PN);
+					})
+					.attr("height", function(d) {
+						return height - yScale(d.PN);
+					})
+					.attr("fill", "#FFD34E");
+
+				g_bar.append("rect")
+					.attr("x", function(d) {
+						return xScale(d.year);
+					})
+					.attr("width", xScale.rangeBand())
+					.attr("y", function(d) {
+						var value = d.public_GA + d.nonUtil_sum;
+						return yScale(value);
+					})
+					.attr("height", function(d) {
+						var value = d.public_GA + d.nonUtil_sum;
+						return height - yScale(value);
+					})
+					.attr("fill", "#338833");
+
+				g_bar.append("text")
+					.text(function(d) {
+						var value = Math.round((d.public_GA + d.nonUtil_sum) * 10000 / d.PN) / 100;
+						return value + "%";
+					})
+					.attr("x", function(d) {
+						return xScale(d.year) + xScale.rangeBand() / 2;
+					})
+					.attr("y", function(d) {
+						var value = d.public_GA + d.nonUtil_sum;
+						return yScale(value);
+					})
+					.attr("text-anchor", "middle")
+					.attr("dy", "-5");
+			});
+		</script>
+	</body>
+</html>
